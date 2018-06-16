@@ -3,13 +3,14 @@ compile: Client/*.java Server/*.java
 	javac Server/*.java
 
 startServer:
-	java Server.Server 127.0.0.1 9991 9992 9993
+	java Server.Server 127.0.0.1 9911 9912 9913
 	
 clientExampleSmall:
-	java Client.Client exampleSmall REGISTRY_IP=127.0.0.1 PORTS="9991 9992 9993"
+	java Client.Client exampleSmall 127.0.0.1 9911 9912 9913
 
 clientExampleBig:
-	java Client.Client exampleBig REGISTRY_IP=127.0.0.1 PORTS="9991 9992 9993"
+    java Client.Client exampleBig 127.0.0.1 9911 9912 9913
+
 
 clean:
 	rm Client/*.class
