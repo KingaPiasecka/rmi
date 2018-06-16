@@ -124,23 +124,7 @@ public class Client {
             }
 
         }
-        
-//        calls = new ArrayList<>();
-//        for(int i=0; i<workerServersCount; ++i) {
-//            final int workerId = i;
-//            calls.add(Executors.callable(() -> {
-//                int[] workerPrevNodes = new int[0];
-//                try {
-//                    workerPrevNodes = serverNodes[workerId].getWorkerPrevNodesPart();
-//                } catch (RemoteException e) {
-//                    e.printStackTrace();
-//                }
-//                System.out.println(workerId + ", fromNode=" + workerFromNodes[workerId] + ", count=" + workerNodesCount[workerId]);
-//                System.arraycopy(workerPrevNodes, 0, prevNodes, workerFromNodes[workerId], workerNodesCount[workerId]);
-//            }));
-//        }
-//        executor.invokeAll(calls);
-        
+
         System.out.println("Dijkstra algorithm over");
         System.out.println("Started from node index = " + initialNode);
         System.out.print("Distances (X means no path) = [");
@@ -151,16 +135,7 @@ public class Client {
                 System.out.print(distances[node] + ", ");
         }
         System.out.println("\b\b]");
-        
-//        System.out.print("PrevNodes (X means initialNode) = [");
-//        for(int node = 0; node < nodesCount; ++node) {
-//            if (node == initialNode)
-//                System.out.print("X, ");
-//            else
-//                System.out.print(prevNodes[node] + ", ");
-//        }
-//        System.out.println("\b\b]");
-        
+
         executor.shutdown();
     }
     
@@ -168,6 +143,4 @@ public class Client {
 
         return this.graph.getWeights()[fromNode][toNode] != -1;
     }
-
-
 }
