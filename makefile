@@ -1,5 +1,5 @@
-compile: Main/*.java Server/*.java
-	javac Main/*.java
+compile: Client/*.java Server/*.java
+	javac Client/*.java
 	javac Server/*.java
 
 startServer:
