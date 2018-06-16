@@ -21,7 +21,7 @@ public class DijkstraClient {
     private int[] workerNodesCount;
     private int[] workerFromNodes;
     private HashSet<Integer> seenNodes;
-    const int MAX_INT = 2147483647;
+    int MAX_INT = 2147483647;
 
     public DijkstraClient(Map map, String host, String[] serverPorts) throws Exception {
         workerServersCount = serverPorts.length;

@@ -43,7 +43,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
     private int[] distances;
     private int[] prevNodes;
     private HashSet<Integer> visitedNodes;
-    const int MAX_INT = 2147483647;
+    int MAX_INT = 2147483647;
     
     public void setInitialData(int workerId, int nodesCount, int[] ranges, int[][] weights) throws RemoteException {
         this.weights = weights;
@@ -100,7 +100,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
     private int[] getWorkerArrayPart(int[] array) {
         int[] result = new int[this.toNode - this.fromNode + 1];
         for(int i = this.fromNode; i <= this.toNode; ++i){
-            result[i-this.fromNode] = array[i];
+            result[i - this.fromNode] = array[i];
         }
 
         return result;
