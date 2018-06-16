@@ -20,6 +20,8 @@ public class Client
             serversPorts[i - 2] = args[i];
         }
 
+
+        System.out.println(serversPorts[0] + " " + serversPorts[1]);
         System.out.println("Getting map");
         Graph graph = Graph.mapGraphFromFile("testcases/" + testcase);
         graph.printWeights();
