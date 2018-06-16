@@ -21,7 +21,6 @@ public class Client
         }
 
 
-        System.out.println(serversPorts[0] + " " + serversPorts[1]);
         System.out.println("Getting map");
         Graph graph = Graph.mapGraphFromFile("testcases/" + testcase);
         graph.printWeights();
