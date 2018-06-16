@@ -38,7 +38,7 @@ public class DijkstraClient {
 
     private int[] calculateWorkerNodeRanges(int workerNodeId) {
         int nodesCount = graph.getNumberOfVertices();
-        int[] resultsPair = new int[2];
+
 
         int fromNode = (nodesCount / workerServersCount) * workerNodeId;
         int toNode = (nodesCount / workerServersCount) * (workerNodeId + 1) - 1;
@@ -54,6 +54,7 @@ public class DijkstraClient {
             toNode += otherNodesCount;
         }
 
+        int[] resultsPair = new int[2];
         resultsPair[0] = fromNode;
         resultsPair[1] = toNode;
 
