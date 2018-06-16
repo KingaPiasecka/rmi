@@ -39,10 +39,10 @@ public class Graph
     {
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String header = br.readLine();
-            if (!header.startsWith("vertices"))
-                throw new RuntimeException("Invalid testcase format.");
+/*            if (!header.startsWith("vertices"))
+                throw new RuntimeException("Invalid testcase format.");*/
 
-            int verticesCount = Integer.parseInt(header.replaceAll("[^0-9]", ""));
+            int verticesCount = Integer.parseInt(header);
             Graph m = new Graph(verticesCount);
 
             for (int i = 0; i < verticesCount; ++i) {
