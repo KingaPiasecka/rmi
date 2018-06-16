@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Client {
-    private Map graph;
+    private Graph graph;
     private ServerInterface[] serverNodes;
     private int workerServersCount;
     private int[] workerNodesCount;
@@ -21,7 +21,7 @@ public class Client {
     private int MAX_INT = 2147483647;
     private ExecutorService executor;
 
-    public Client(Map graph, String host, String[] serverPorts) throws Exception {
+    public Client(Graph graph, String host, String[] serverPorts) throws Exception {
         workerServersCount = serverPorts.length;
         serverNodes = new ServerInterface[workerServersCount];
         workerNodesCount = new int[workerServersCount];
@@ -38,7 +38,7 @@ public class Client {
     }
 
     private Pair<Integer, Integer> calculateWorkerNodeRanges(int workerNodeId) {
-        int nodesCount = graph.getNodesCount();
+        int nodesCount = graph.getNumberOfVertices();
 
         int fromNode = (nodesCount / workerServersCount) * workerNodeId;
         int toNode = (nodesCount / workerServersCount) * (workerNodeId + 1) - 1;
@@ -59,7 +59,7 @@ public class Client {
 
     void run() throws InterruptedException {
         final int[][] weights = graph.getWeights();
-        int nodesCount = graph.getNodesCount();
+        int nodesCount = graph.getNumberOfVertices();
         
         int[] distances = new int[nodesCount];
         int[] prevNodes = new int[nodesCount];

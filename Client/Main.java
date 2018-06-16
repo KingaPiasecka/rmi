@@ -10,9 +10,7 @@ public class Main {
             serversPorts[i - 2] = args[i];
         }
 
-        // graph = Graph.mapGraphFromFile("cases/" + example);
-        //graph.printWeights();
-        Map graph = Map.fromFile("cases/testcase0");
+        Graph graph = Graph.mapGraphFromFile("cases/" + example);
 
         new Client(graph, hostIP, serversPorts).run();
     }
