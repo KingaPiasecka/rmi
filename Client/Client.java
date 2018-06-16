@@ -1,6 +1,8 @@
 package Client;
 
 import Shared.ServerInterface;
+import javafx.util.Pair;
+
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -35,7 +37,7 @@ public class Client {
         executor = Executors.newFixedThreadPool(workerServersCount);
     }
 
-    private int[] calculateWorkerNodeRanges(int workerNodeId) {
+    private Pair<Integer, Integer> calculateWorkerNodeRanges(int workerNodeId) {
         int nodesCount = graph.getNumberOfVertices();
 
         int fromNode = (nodesCount / workerServersCount) * workerNodeId;
@@ -52,11 +54,7 @@ public class Client {
             toNode += otherNodesCount;
         }
 
-        int[] resultsPair = new int[2];
-        resultsPair[0] = fromNode;
-        resultsPair[1] = toNode;
-
-        return resultsPair;
+        return new Pair<>(fromNode, toNode);
     }
 
     public void run() throws InterruptedException, RemoteException {
@@ -80,9 +78,9 @@ public class Client {
             final int workerId = i;
             calls.add(Executors.callable(() -> {
                 System.out.println("Sending weights to worker " + workerId);
-                int[] nodeRanges = calculateWorkerNodeRanges(workerId);
-                int fromNode = nodeRanges[0];
-                int toNode = nodeRanges[1];
+                Pair<Integer, Integer> nodeRanges = calculateWorkerNodeRanges(workerId);
+                int fromNode = nodeRanges.getKey();
+                int toNode = nodeRanges.getValue();
                 workerNodesCount[workerId] = toNode - fromNode + 1;
                 workerFromNodes[workerId] = fromNode;
                 try {

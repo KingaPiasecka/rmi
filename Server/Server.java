@@ -7,6 +7,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 import java.util.HashSet;
 import Shared.*;
+import javafx.util.Pair;
 
 public class Server extends UnicastRemoteObject implements ServerInterface {
     public Server() throws RemoteException {
@@ -45,11 +46,11 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
     private HashSet<Integer> visitedNodes;
     int MAX_INT = 2147483647;
     
-    public void setInitialData(int workerId, int nodesCount, int[] ranges, int[][] weights) throws RemoteException {
+    public void setInitialData(int workerId, int nodesCount, Pair<Integer, Integer> ranges, int[][] weights) throws RemoteException {
         this.weights = weights;
         this.workerId = workerId;
-        this.fromNode = ranges[0];
-        this.toNode = ranges[1];
+        this.fromNode = ranges.getKey();
+        this.toNode = ranges.getValue();
         this.nodesCount = nodesCount;
         this.visitedNodes = new HashSet<>();
         this.distances = new int[nodesCount];
