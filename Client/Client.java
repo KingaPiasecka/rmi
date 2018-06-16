@@ -19,7 +19,7 @@ public class Client
 
         if (args.length < 3)
         {
-            System.out.println("Usage: <testcaseNumber> <host> <serverPorts>...");
+            System.out.println("Usage: <case> <host> <serverPorts>...");
             return;
         }
 
@@ -27,22 +27,17 @@ public class Client
         String host = args[1];
         String[] serversPorts = new String[args.length - 2];
 
-        for(int i=2; i<args.length; ++i)
-            serversPorts[i-2] = args[i];
-
-        try
-        {
-            System.out.println("Getting map");
-            Map m = Map.fromFile("testcases/testcase" + testcaseNumber);
-            m.printWeights();
-
-            System.out.println("Launching Dijkstra");
-            new DijkstraClient(m, host, serversPorts).run();
+        for(int i = 2;  i < args.length; ++i) {
+            serversPorts[i - 2] = args[i];
         }
-        catch(Exception e)
-        {
-            System.out.println("Sth crashed");
-            e.printStackTrace();
-        }
+
+        System.out.println("Getting map");
+        Map m = Map.fromFile("testcases/testcase" + testcaseNumber);
+        m.printWeights();
+
+        System.out.println("Launching Dijkstra");
+        new DijkstraClient(m, host, serversPorts).run();
+
+
     }
 }

@@ -11,10 +11,17 @@ import java.rmi.registry.Registry;
 import java.util.concurrent.*;
 import java.util.*;
 import java.rmi.*;
-
 import Shared.*;
 
 public class DijkstraClient {
+    private Map map;
+    private int workerServersCount;
+    private ExecutorService executor;
+    private ServerInterface[] workerServers;
+    private int[] workerNodesCount;
+    private int[] workerFromNodes;
+    private HashSet<Integer> nodesAlreadySeen;
+
     public DijkstraClient(Map map, String host, String[] serverPorts) throws Exception {
         workerServersCount = serverPorts.length;
         workerServers = new ServerInterface[workerServersCount];
@@ -30,14 +37,7 @@ public class DijkstraClient {
         }
         executor = Executors.newFixedThreadPool(workerServersCount);
     }
-    
-    private Map map;
-    private int workerServersCount;
-    private ExecutorService executor;
-    private ServerInterface[] workerServers;
-    private int[] workerNodesCount;
-    private int[] workerFromNodes;
-    private HashSet<Integer> nodesAlreadySeen;
+
     
     public void run() throws InterruptedException, RemoteException {
         final int[][] weights = map.getWeights();
