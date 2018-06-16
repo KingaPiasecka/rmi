@@ -1,16 +1,5 @@
 package Client;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.rmi.*;
-import java.util.concurrent.*;
-
-import Shared.*;
-
 public class Client
 {
     public static void main( String args[] ) throws Exception
@@ -23,7 +12,7 @@ public class Client
             return;
         }
 
-        String testcaseNumber = args[0];
+        String testcase = args[0];
         String host = args[1];
         String[] serversPorts = new String[args.length - 2];
 
@@ -32,11 +21,11 @@ public class Client
         }
 
         System.out.println("Getting map");
-        Map m = Map.fromFile("testcases/testcase" + testcaseNumber);
-        m.printWeights();
+        Graph graph = Graph.mapGraphFromFile("testcases/" + testcase);
+        graph.printWeights();
 
         System.out.println("Launching Dijkstra");
-        new DijkstraClient(m, host, serversPorts).run();
+        new DijkstraClient(graph, host, serversPorts).run();
 
 
     }
