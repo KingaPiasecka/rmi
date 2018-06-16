@@ -43,6 +43,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
     private int[] distances;
     private int[] prevNodes;
     private HashSet<Integer> visitedNodes;
+    const int MAX_INT = 2147483647;
     
     public void setInitialData(int workerId, int nodesCount, int[] ranges, int[][] weights) throws RemoteException {
         this.weights = weights;
@@ -55,13 +56,13 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
         this.prevNodes = new int[nodesCount];
         
         for(int i=0; i<nodesCount; ++i)
-            this.distances[i] = this.prevNodes[i] = Integer.MAX_VALUE;
+            this.distances[i] = this.prevNodes[i] = MAX_INT;
     }
     
     public int[] calculateDistances(Integer currentNode, int distanceToCurrentNode) throws RemoteException {
         distances[currentNode] = distanceToCurrentNode;
         
-        for(int node=this.fromNode; node<=this.toNode; ++node) {
+        for(int node = this.fromNode; node <= this.toNode; ++node) {
             if (visitedNodes.contains(node)) {
                 System.out.println("Worker " + this.workerId + ": node " + node + " already visited.");
                 continue;
@@ -98,8 +99,10 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
     
     private int[] getWorkerArrayPart(int[] array) {
         int[] result = new int[this.toNode - this.fromNode + 1];
-        for(int i=this.fromNode; i<=this.toNode; ++i)
+        for(int i = this.fromNode; i <= this.toNode; ++i){
             result[i-this.fromNode] = array[i];
+        }
+
         return result;
     }
 }

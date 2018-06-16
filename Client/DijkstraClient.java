@@ -20,18 +20,19 @@ public class DijkstraClient {
     private ServerInterface[] workerServers;
     private int[] workerNodesCount;
     private int[] workerFromNodes;
-    private HashSet<Integer> nodesAlreadySeen;
+    private HashSet<Integer> seenNodes;
+    const int MAX_INT = 2147483647;
 
     public DijkstraClient(Map map, String host, String[] serverPorts) throws Exception {
         workerServersCount = serverPorts.length;
         workerServers = new ServerInterface[workerServersCount];
         workerNodesCount = new int[workerServersCount];
         workerFromNodes = new int[workerServersCount];
-        nodesAlreadySeen = new HashSet<>();
+        seenNodes = new HashSet<>();
         
         this.map = map;
         
-        for(int i=0; i<workerServersCount; ++i) {
+        for(int i = 0; i < workerServersCount; ++i) {
             Registry reg = LocateRegistry.getRegistry(host, Integer.parseInt(serverPorts[i]));
             workerServers[i] = (ServerInterface) reg.lookup("server");
         }
@@ -69,12 +70,13 @@ public class DijkstraClient {
         int[] distances = new int[nodesCount];
         int[] prevNodes = new int[nodesCount];
         
-        for(int i=0; i<nodesCount; ++i)
-            distances[i] = prevNodes[i] = Integer.MAX_VALUE;
-        
+        for(int i = 0; i < nodesCount; ++i){
+            distances[i] = prevNodes[i] = MAX_INT;
+        }
+
         int initialNode = 0;
-        PriorityQueue<Integer> nodesToVisitQ = new PriorityQueue<>();
-        nodesToVisitQ.add(initialNode);
+        PriorityQueue<Integer> nodesToVisit = new PriorityQueue<>();
+        nodesToVisit.add(initialNode);
         
         System.out.println("Sending weights to workers...");
         List<Callable<Object>> calls = new ArrayList<>();
@@ -98,10 +100,10 @@ public class DijkstraClient {
         executor.invokeAll(calls);
 
         distances[initialNode] = 0;
-        nodesAlreadySeen.add(initialNode);
+        seenNodes.add(initialNode);
         
-        while(nodesToVisitQ.size() != 0) {
-            Integer currentNode = nodesToVisitQ.poll();
+        while(nodesToVisit.size() != 0) {
+            Integer currentNode = nodesToVisit.poll();
             System.out.println("Going through node = " + currentNode);
             
             calls = new ArrayList<>();
@@ -121,9 +123,9 @@ public class DijkstraClient {
             executor.invokeAll(calls);
             
             for(int node=0; node<nodesCount; ++node) {
-                if (nodesAlreadySeen.contains(node) == false && isConnected(currentNode, node)) {
-                    nodesToVisitQ.add(node);
-                    nodesAlreadySeen.add(node);
+                if (seenNodes.contains(node) == false && isConnected(currentNode, node)) {
+                    nodesToVisit.add(node);
+                    seenNodes.add(node);
                 }
             }
 
@@ -149,7 +151,7 @@ public class DijkstraClient {
         System.out.println("Started from node index = " + initialNode);
         System.out.print("Distances (X means no path) = [");
         for(int node=0; node<nodesCount; ++node) {
-            if (distances[node] == Integer.MAX_VALUE)
+            if (distances[node] == MAX_INT)
                 System.out.print("X, ");
             else
                 System.out.print(distances[node] + ", ");
