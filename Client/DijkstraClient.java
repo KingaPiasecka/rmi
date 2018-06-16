@@ -38,10 +38,32 @@ public class DijkstraClient {
         executor = Executors.newFixedThreadPool(workerServersCount);
     }
 
-    
+    private int[] calculateWorkerNodeRanges(int workerNodeId) {
+        int nodesCount = map.getNodesCount();
+        int[] resultsPair = new int[2];
+
+        int fromNode = (nodesCount / workerServersCount) * workerNodeId;
+        int toNode = (nodesCount / workerServersCount) * (workerNodeId + 1) - 1;
+
+        int otherNodesCount = nodesCount % workerServersCount;
+
+        if (workerNodeId < otherNodesCount) {
+            fromNode += workerNodeId;
+            toNode += workerNodeId + 1;
+        }
+        else {
+            fromNode += otherNodesCount;
+            toNode += otherNodesCount;
+        }
+
+        resultsPair[0] = fromNode;
+        resultsPair[1] = toNode;
+
+        return resultsPair;
+    }
+
     public void run() throws InterruptedException, RemoteException {
         final int[][] weights = map.getWeights();
-        //String[] nodesNames = map.getNodesNames();
         int nodesCount = map.getNodesCount();
         
         int[] distances = new int[nodesCount];
@@ -50,7 +72,7 @@ public class DijkstraClient {
         for(int i=0; i<nodesCount; ++i)
             distances[i] = prevNodes[i] = Integer.MAX_VALUE;
         
-        int initialNode = 0; // TODO
+        int initialNode = 0;
         PriorityQueue<Integer> nodesToVisitQ = new PriorityQueue<>();
         nodesToVisitQ.add(initialNode);
         
@@ -88,7 +110,7 @@ public class DijkstraClient {
                 calls.add(Executors.callable(() -> {
                     System.out.println("Sending weights to worker " + workerId);
                     try {
-                        int[] workerDistances = workerServers[workerId].computeDistances(currentNode, distances[currentNode]);
+                        int[] workerDistances = workerServers[workerId].calculateDistances(currentNode, distances[currentNode]);
                         System.arraycopy(workerDistances, 0, distances, workerFromNodes[workerId], workerNodesCount[workerId]);
                     }
                     catch(RemoteException e) {
@@ -98,11 +120,13 @@ public class DijkstraClient {
             }
             executor.invokeAll(calls);
             
-            for(int node=0; node<nodesCount; ++node)
+            for(int node=0; node<nodesCount; ++node) {
                 if (nodesAlreadySeen.contains(node) == false && isConnected(currentNode, node)) {
                     nodesToVisitQ.add(node);
                     nodesAlreadySeen.add(node);
                 }
+            }
+
         }
         
         calls = new ArrayList<>();
@@ -147,27 +171,6 @@ public class DijkstraClient {
     private boolean isConnected(int fromNode, int toNode) {
         return this.map.getWeights()[fromNode][toNode] != -1;
     }
-    private int[] calculateWorkerNodeRanges(int workerServerId) {
-        int nodesCount = map.getNodesCount();
-        int[] results = new int[2];
-        
-        int fromNode = (nodesCount / workerServersCount) * workerServerId;
-        int toNode = (nodesCount / workerServersCount) * (workerServerId + 1) - 1;
-        
-        int restNodes = nodesCount % workerServersCount;
-        
-        if (workerServerId < restNodes) {
-            fromNode += workerServerId;
-            toNode += workerServerId + 1;
-        }
-        else {
-            fromNode += restNodes;
-            toNode += restNodes;
-        }
-        
-        results[0] = fromNode;
-        results[1] = toNode;
-        
-        return results;
-    }
+
+
 }

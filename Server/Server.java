@@ -58,7 +58,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
             this.distances[i] = this.prevNodes[i] = Integer.MAX_VALUE;
     }
     
-    public int[] computeDistances(Integer currentNode, int distanceToCurrentNode) throws RemoteException {
+    public int[] calculateDistances(Integer currentNode, int distanceToCurrentNode) throws RemoteException {
         distances[currentNode] = distanceToCurrentNode;
         
         for(int node=this.fromNode; node<=this.toNode; ++node) {
