@@ -10,7 +10,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class DijkstraClient {
+public class Client {
     private Graph graph;
     private int workerServersCount;
     private ExecutorService executor;
@@ -20,7 +20,7 @@ public class DijkstraClient {
     private HashSet<Integer> seenNodes;
     int MAX_INT = 2147483647;
 
-    public DijkstraClient(Graph graph, String host, String[] serverPorts) throws Exception {
+    public Client(Graph graph, String host, String[] serverPorts) throws Exception {
         workerServersCount = serverPorts.length;
         workerServers = new ServerInterface[workerServersCount];
         workerNodesCount = new int[workerServersCount];

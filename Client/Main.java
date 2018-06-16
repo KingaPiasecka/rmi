@@ -13,6 +13,6 @@ public class Main {
         Graph graph = Graph.mapGraphFromFile("cases/" + example);
         graph.printWeights();
 
-        new DijkstraClient(graph, hostIP, serversPorts).run();
+        new Client(graph, hostIP, serversPorts).run();
     }
 }
