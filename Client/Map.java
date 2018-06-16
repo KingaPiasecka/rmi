@@ -1,53 +1,48 @@
 package Client;
 
+
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 
 public class Map
 {
-    private static final int NO_EDGE = -1;
-    private static final int NO_WEIGHT = '0';
-    private final static String DELIMITER = " ";
+    static final int NO_EDGE = -1;
 
-    private List<String> nodes;
+    private String[] nodesNames;
     private int[][] weights;
-    private int numberOfVertices;
+    private int nodesCount;
 
-    private Graph(int numberOfVertices)
+    final static String delimiter = ",";
+
+    private Map(int verticesCount)
     {
-        this.nodes = new ArrayList<>();
-        this.weights = new int[numberOfVertices][numberOfVertices];
-        this.numberOfVertices = numberOfVertices;
+        nodesNames = new String[verticesCount];
+        weights = new int[verticesCount][verticesCount];
+        this.nodesCount = verticesCount;
     }
 
-    public List<String> getNodes() {
-        return nodes;
-    }
+    public int getNodesCount() { return nodesCount; }
+    int[][] getWeights() { return weights; }
+    String[] getNodesNames() { return nodesNames; }
 
-    public int[][] getWeights() {
-        return weights;
-    }
-
-    public int getNumberOfVertices() {
-        return numberOfVertices;
-    }
-
-    public static Graph mapGraphFromFile(String filename) throws Exception
+    public static Map fromFile(String filename) throws Exception
     {
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String header = br.readLine();
-/*            if (!header.startsWith("vertices"))
-                throw new RuntimeException("Invalid testcase format.");*/
+            if (!header.startsWith("vertices"))
+                throw new RuntimeException("Invalid testcase format.");
 
-            int verticesCount = Integer.parseInt(header);
-            Graph m = new Graph(verticesCount);
+            int verticesCount = Integer.parseInt(header.replaceAll("[^0-9]", ""));
+            Map m = new Map(verticesCount);
 
             for (int i = 0; i < verticesCount; ++i) {
                 String line = br.readLine();
-                String[] cases = line.split(DELIMITER);
+                String[] cases = line.split(delimiter);
 
                 for (int j = 0; j < verticesCount; ++j) {
                     String numstr = cases[j].trim();
@@ -61,7 +56,7 @@ public class Map
             for (int i = 0; i < verticesCount; ++i) {
                 String nodeName = String.valueOf((char)('A' + i));
                 System.out.println("Adding node: " + nodeName);
-                m.nodes.add(nodeName);
+                m.nodesNames[i] = nodeName;
             }
 
             return m;
@@ -74,8 +69,8 @@ public class Map
 
     void printWeights()
     {
-        for (int i = 0; i < numberOfVertices; ++i) {
-            for (int j = 0; j < numberOfVertices; ++j) {
+        for (int i = 0; i < nodesCount; ++i) {
+            for (int j = 0; j < nodesCount; ++j) {
                 if (weights[i][j] != NO_EDGE)
                     System.out.print(weights[i][j] + " ");
                 else
@@ -85,4 +80,3 @@ public class Map
         }
     }
 }
-
