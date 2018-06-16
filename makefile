@@ -9,13 +9,8 @@ clientExampleSmall:
 	java Client.Client exampleSmall 127.0.0.1 9911 9912 9913
 
 clientExampleBig:
-    java Client.Client exampleBig 127.0.0.1 9911 9912 9913
-
+	java Client.Client exampleBig 127.0.0.1 9911 9912 9913
 
 clean:
 	rm Client/*.class
 	rm Server/*.class
-
-
-
-
