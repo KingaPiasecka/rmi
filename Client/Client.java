@@ -27,10 +27,10 @@ public class Client {
         workerNodesCount = new int[workerServersCount];
         workerFromNodes = new int[workerServersCount];
         seenNodes = new HashSet<>();
-        
+
         this.graph = graph;
-        
-        for(int i = 0; i < workerServersCount; ++i) {
+
+        for (int i = 0; i < workerServersCount; ++i) {
             Registry reg = LocateRegistry.getRegistry(host, Integer.parseInt(serverPorts[i]));
             serverNodes[i] = (ServerInterface) reg.lookup("server");
         }
@@ -48,8 +48,7 @@ public class Client {
         if (workerNodeId < otherNodesCount) {
             fromNode += workerNodeId;
             toNode += workerNodeId + 1;
-        }
-        else {
+        } else {
             fromNode += otherNodesCount;
             toNode += otherNodesCount;
         }
@@ -60,21 +59,21 @@ public class Client {
     void run() throws InterruptedException {
         final int[][] weights = graph.getWeights();
         int nodesCount = graph.getNumberOfVertices();
-        
+
         int[] distances = new int[nodesCount];
         int[] prevNodes = new int[nodesCount];
-        
-        for(int i = 0; i < nodesCount; ++i){
+
+        for (int i = 0; i < nodesCount; ++i) {
             distances[i] = prevNodes[i] = MAX_INT;
         }
 
         int initialNode = 0;
         PriorityQueue<Integer> nodesToVisit = new PriorityQueue<>();
         nodesToVisit.add(initialNode);
-        
+
         System.out.println("Sending weights to workers...");
         List<Callable<Object>> calls = new ArrayList<>();
-        for(int i=0; i<workerServersCount; ++i) {
+        for (int i = 0; i < workerServersCount; ++i) {
             final int workerId = i;
             calls.add(Executors.callable(() -> {
                 System.out.println("Sending weights to worker " + workerId);
@@ -95,13 +94,13 @@ public class Client {
 
         distances[initialNode] = 0;
         seenNodes.add(initialNode);
-        
-        while(nodesToVisit.size() != 0) {
+
+        while (nodesToVisit.size() != 0) {
             Integer currentNode = nodesToVisit.poll();
             System.out.println("Going through node = " + currentNode);
-            
+
             calls = new ArrayList<>();
-            for(int i = 0; i < workerServersCount; ++i) {
+            for (int i = 0; i < workerServersCount; ++i) {
                 final int workerId = i;
                 calls.add(Executors.callable(() -> {
                     System.out.println("Sending weights to worker " + workerId);
@@ -115,8 +114,8 @@ public class Client {
                 }));
             }
             executor.invokeAll(calls);
-            
-            for(int node = 0; node < nodesCount; ++node) {
+
+            for (int node = 0; node < nodesCount; ++node) {
                 if (!seenNodes.contains(node) && isConnected(currentNode, node)) {
                     nodesToVisit.add(node);
                     seenNodes.add(node);
@@ -128,7 +127,7 @@ public class Client {
         System.out.println("Dijkstra algorithm over");
         System.out.println("Started from node index = " + initialNode);
         System.out.print("Distances (X means no path) = [");
-        for(int node = 0; node < nodesCount; ++node) {
+        for (int node = 0; node < nodesCount; ++node) {
             if (distances[node] == MAX_INT)
                 System.out.print("X, ");
             else
@@ -138,7 +137,7 @@ public class Client {
 
         executor.shutdown();
     }
-    
+
     private boolean isConnected(int fromNode, int toNode) {
 
         return this.graph.getWeights()[fromNode][toNode] != -1;
