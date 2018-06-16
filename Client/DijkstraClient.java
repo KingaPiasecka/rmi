@@ -1,20 +1,17 @@
 package Client;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import Shared.ServerInterface;
+
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.concurrent.*;
 import java.util.*;
-import java.rmi.*;
-import Shared.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class DijkstraClient {
-    private Map map;
+    private Graph graph;
     private int workerServersCount;
     private ExecutorService executor;
     private ServerInterface[] workerServers;
@@ -23,14 +20,14 @@ public class DijkstraClient {
     private HashSet<Integer> seenNodes;
     int MAX_INT = 2147483647;
 
-    public DijkstraClient(Map map, String host, String[] serverPorts) throws Exception {
+    public DijkstraClient(Graph graph, String host, String[] serverPorts) throws Exception {
         workerServersCount = serverPorts.length;
         workerServers = new ServerInterface[workerServersCount];
         workerNodesCount = new int[workerServersCount];
         workerFromNodes = new int[workerServersCount];
         seenNodes = new HashSet<>();
         
-        this.map = map;
+        this.graph = graph;
         
         for(int i = 0; i < workerServersCount; ++i) {
             Registry reg = LocateRegistry.getRegistry(host, Integer.parseInt(serverPorts[i]));
@@ -40,7 +37,7 @@ public class DijkstraClient {
     }
 
     private int[] calculateWorkerNodeRanges(int workerNodeId) {
-        int nodesCount = map.getNodesCount();
+        int nodesCount = graph.getNumberOfVertices();
         int[] resultsPair = new int[2];
 
         int fromNode = (nodesCount / workerServersCount) * workerNodeId;
@@ -64,8 +61,8 @@ public class DijkstraClient {
     }
 
     public void run() throws InterruptedException, RemoteException {
-        final int[][] weights = map.getWeights();
-        int nodesCount = map.getNodesCount();
+        final int[][] weights = graph.getWeights();
+        int nodesCount = graph.getNumberOfVertices();
         
         int[] distances = new int[nodesCount];
         int[] prevNodes = new int[nodesCount];
@@ -171,7 +168,7 @@ public class DijkstraClient {
     }
     
     private boolean isConnected(int fromNode, int toNode) {
-        return this.map.getWeights()[fromNode][toNode] != -1;
+        return this.graph.getWeights()[fromNode][toNode] != -1;
     }
 
 
