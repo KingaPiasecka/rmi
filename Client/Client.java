@@ -1,7 +1,6 @@
 package Client;
 
 import Shared.ServerInterface;
-
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -12,17 +11,17 @@ import java.util.concurrent.Executors;
 
 public class Client {
     private Graph graph;
+    private ServerInterface[] serverNodes;
     private int workerServersCount;
-    private ExecutorService executor;
-    private ServerInterface[] workerServers;
     private int[] workerNodesCount;
     private int[] workerFromNodes;
     private HashSet<Integer> seenNodes;
     int MAX_INT = 2147483647;
+    private ExecutorService executor;
 
     public Client(Graph graph, String host, String[] serverPorts) throws Exception {
         workerServersCount = serverPorts.length;
-        workerServers = new ServerInterface[workerServersCount];
+        serverNodes = new ServerInterface[workerServersCount];
         workerNodesCount = new int[workerServersCount];
         workerFromNodes = new int[workerServersCount];
         seenNodes = new HashSet<>();
@@ -31,14 +30,13 @@ public class Client {
         
         for(int i = 0; i < workerServersCount; ++i) {
             Registry reg = LocateRegistry.getRegistry(host, Integer.parseInt(serverPorts[i]));
-            workerServers[i] = (ServerInterface) reg.lookup("server");
+            serverNodes[i] = (ServerInterface) reg.lookup("server");
         }
         executor = Executors.newFixedThreadPool(workerServersCount);
     }
 
     private int[] calculateWorkerNodeRanges(int workerNodeId) {
         int nodesCount = graph.getNumberOfVertices();
-
 
         int fromNode = (nodesCount / workerServersCount) * workerNodeId;
         int toNode = (nodesCount / workerServersCount) * (workerNodeId + 1) - 1;
@@ -82,17 +80,12 @@ public class Client {
             final int workerId = i;
             calls.add(Executors.callable(() -> {
                 System.out.println("Sending weights to worker " + workerId);
-                try {
-                    int[] nodeRanges = calculateWorkerNodeRanges(workerId);
-                    int fromNode = nodeRanges[0];
-                    int toNode = nodeRanges[1];
-                    workerNodesCount[workerId] = toNode - fromNode + 1;
-                    workerFromNodes[workerId] = fromNode;
-                    workerServers[workerId].setInitialData(workerId, nodesCount, nodeRanges, weights);
-                }
-                catch(RemoteException e) {
-                    e.printStackTrace();
-                }
+                int[] nodeRanges = calculateWorkerNodeRanges(workerId);
+                int fromNode = nodeRanges[0];
+                int toNode = nodeRanges[1];
+                workerNodesCount[workerId] = toNode - fromNode + 1;
+                workerFromNodes[workerId] = fromNode;
+                serverNodes[workerId].setInitialData(workerId, nodesCount, nodeRanges, weights);
             }));
         }
         executor.invokeAll(calls);
@@ -105,22 +98,17 @@ public class Client {
             System.out.println("Going through node = " + currentNode);
             
             calls = new ArrayList<>();
-            for(int i=0; i<workerServersCount; ++i) {
+            for(int i = 0; i < workerServersCount; ++i) {
                 final int workerId = i;
                 calls.add(Executors.callable(() -> {
                     System.out.println("Sending weights to worker " + workerId);
-                    try {
-                        int[] workerDistances = workerServers[workerId].calculateDistances(currentNode, distances[currentNode]);
-                        System.arraycopy(workerDistances, 0, distances, workerFromNodes[workerId], workerNodesCount[workerId]);
-                    }
-                    catch(RemoteException e) {
-                        e.printStackTrace();
-                    }
+                    int[] workerDistances = serverNodes[workerId].calculateDistances(currentNode, distances[currentNode]);
+                    System.arraycopy(workerDistances, 0, distances, workerFromNodes[workerId], workerNodesCount[workerId]);
                 }));
             }
             executor.invokeAll(calls);
             
-            for(int node=0; node<nodesCount; ++node) {
+            for(int node = 0; node < nodesCount; ++node) {
                 if (seenNodes.contains(node) == false && isConnected(currentNode, node)) {
                     nodesToVisit.add(node);
                     seenNodes.add(node);
@@ -133,14 +121,9 @@ public class Client {
         for(int i=0; i<workerServersCount; ++i) {
             final int workerId = i;
             calls.add(Executors.callable(() -> {
-                try {
-                    int[] workerPrevNodes = workerServers[workerId].getWorkerPrevNodesPart();
-                    System.out.println(workerId + ", fromNode=" + workerFromNodes[workerId] + ", count=" + workerNodesCount[workerId]);
-                    System.arraycopy(workerPrevNodes, 0, prevNodes, workerFromNodes[workerId], workerNodesCount[workerId]);
-                }
-                catch(Exception e) {
-                    e.printStackTrace();
-                }
+                int[] workerPrevNodes = serverNodes[workerId].getWorkerPrevNodesPart();
+                System.out.println(workerId + ", fromNode=" + workerFromNodes[workerId] + ", count=" + workerNodesCount[workerId]);
+                System.arraycopy(workerPrevNodes, 0, prevNodes, workerFromNodes[workerId], workerNodesCount[workerId]);
             }));
         }
         executor.invokeAll(calls);
@@ -148,7 +131,7 @@ public class Client {
         System.out.println("Dijkstra algorithm over");
         System.out.println("Started from node index = " + initialNode);
         System.out.print("Distances (X means no path) = [");
-        for(int node=0; node<nodesCount; ++node) {
+        for(int node = 0; node < nodesCount; ++node) {
             if (distances[node] == MAX_INT)
                 System.out.print("X, ");
             else
@@ -157,7 +140,7 @@ public class Client {
         System.out.println("\b\b]");
         
         System.out.print("PrevNodes (X means initialNode) = [");
-        for(int node=0; node<nodesCount; ++node) {
+        for(int node = 0; node < nodesCount; ++node) {
             if (node == initialNode)
                 System.out.print("X, ");
             else
@@ -169,6 +152,7 @@ public class Client {
     }
     
     private boolean isConnected(int fromNode, int toNode) {
+
         return this.graph.getWeights()[fromNode][toNode] != -1;
     }
 
