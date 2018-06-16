@@ -14,7 +14,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
         super();
     }
 
-    public static void main(String args[]) throws Exception {
+    public static void main(String args[]) throws RemoteException {
         if (args.length < 2) {
             System.out.println("Server usage: <host> <ports>...");
             return;
@@ -22,17 +22,12 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
 
         String host = args[0];
 
-        for(int i=1; i<args.length; ++i) {
-            try {
+        for(int i = 1; i < args.length; ++i) {
                 String port = args[i];
                 System.setProperty("java.rmi.server.hostname", host);
                 Registry reg = LocateRegistry.createRegistry(Integer.parseInt(port));
                 reg.rebind("server", new Server());
                 System.out.println("Server started on " + host + ":" + port);
-            }
-            catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
         }
     }
 
@@ -44,7 +39,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
     private int[] distances;
     private int[] prevNodes;
     private HashSet<Integer> visitedNodes;
-    int MAX_INT = 2147483647;
+    private int MAX_INT = 2147483647;
     
     public void setInitialData(int workerId, int nodesCount, Pair<Integer, Integer> ranges, int[][] weights) throws RemoteException {
         this.weights = weights;
@@ -60,7 +55,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
             this.distances[i] = this.prevNodes[i] = MAX_INT;
     }
     
-    public int[] calculateDistances(Integer currentNode, int distanceToCurrentNode) throws RemoteException {
+    public int[] calculateDistances(Integer currentNode, int distanceToCurrentNode) {
         distances[currentNode] = distanceToCurrentNode;
         
         for(int node = this.fromNode; node <= this.toNode; ++node) {
@@ -86,7 +81,7 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
         return this.getWorkerDistancesPart();
     }
     
-    public int[] getWorkerPrevNodesPart() throws RemoteException {
+    public int[] getWorkerPrevNodesPart() {
         return this.getWorkerArrayPart(this.prevNodes);
     }
     

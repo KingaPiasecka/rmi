@@ -18,7 +18,7 @@ public class Client {
     private int[] workerNodesCount;
     private int[] workerFromNodes;
     private HashSet<Integer> seenNodes;
-    int MAX_INT = 2147483647;
+    private int MAX_INT = 2147483647;
     private ExecutorService executor;
 
     public Client(Graph graph, String host, String[] serverPorts) throws Exception {
@@ -57,7 +57,7 @@ public class Client {
         return new Pair<>(fromNode, toNode);
     }
 
-    public void run() throws InterruptedException, RemoteException {
+    void run() throws InterruptedException {
         final int[][] weights = graph.getWeights();
         int nodesCount = graph.getNumberOfVertices();
         
@@ -88,6 +88,7 @@ public class Client {
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
+
             }));
         }
         executor.invokeAll(calls);
@@ -116,7 +117,7 @@ public class Client {
             executor.invokeAll(calls);
             
             for(int node = 0; node < nodesCount; ++node) {
-                if (seenNodes.contains(node) == false && isConnected(currentNode, node)) {
+                if (!seenNodes.contains(node) && isConnected(currentNode, node)) {
                     nodesToVisit.add(node);
                     seenNodes.add(node);
                 }
