@@ -85,7 +85,11 @@ public class Client {
                 int toNode = nodeRanges[1];
                 workerNodesCount[workerId] = toNode - fromNode + 1;
                 workerFromNodes[workerId] = fromNode;
-                serverNodes[workerId].setInitialData(workerId, nodesCount, nodeRanges, weights);
+                try {
+                    serverNodes[workerId].setInitialData(workerId, nodesCount, nodeRanges, weights);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
             }));
         }
         executor.invokeAll(calls);
@@ -102,7 +106,12 @@ public class Client {
                 final int workerId = i;
                 calls.add(Executors.callable(() -> {
                     System.out.println("Sending weights to worker " + workerId);
-                    int[] workerDistances = serverNodes[workerId].calculateDistances(currentNode, distances[currentNode]);
+                    int[] workerDistances = new int[0];
+                    try {
+                        workerDistances = serverNodes[workerId].calculateDistances(currentNode, distances[currentNode]);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
                     System.arraycopy(workerDistances, 0, distances, workerFromNodes[workerId], workerNodesCount[workerId]);
                 }));
             }
@@ -121,7 +130,12 @@ public class Client {
         for(int i=0; i<workerServersCount; ++i) {
             final int workerId = i;
             calls.add(Executors.callable(() -> {
-                int[] workerPrevNodes = serverNodes[workerId].getWorkerPrevNodesPart();
+                int[] workerPrevNodes = new int[0];
+                try {
+                    workerPrevNodes = serverNodes[workerId].getWorkerPrevNodesPart();
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
                 System.out.println(workerId + ", fromNode=" + workerFromNodes[workerId] + ", count=" + workerNodesCount[workerId]);
                 System.arraycopy(workerPrevNodes, 0, prevNodes, workerFromNodes[workerId], workerNodesCount[workerId]);
             }));
