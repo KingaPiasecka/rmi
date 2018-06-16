@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class Map
+public class Graph
 {
     private static final int NO_EDGE = -1;
     private static final int NO_WEIGHT = '0';
