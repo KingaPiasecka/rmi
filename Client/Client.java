@@ -121,8 +121,23 @@ public class Client {
                     seenNodes.add(node);
                 }
             }
-
         }
+
+        calls = new ArrayList<>();
+        for(int i = 0; i < workerServersCount; ++i) {
+            final int workerId = i;
+            calls.add(Executors.callable(() -> {
+                try {
+                    int[] workerPrevNodes = serverNodes[workerId].getWorkerPrevNodesPart();
+                    System.out.println(workerId + ", fromNode=" + workerFromNodes[workerId] + ", count=" + workerNodesCount[workerId]);
+                    System.arraycopy(workerPrevNodes, 0, prevNodes, workerFromNodes[workerId], workerNodesCount[workerId]);
+                }
+                catch(Exception e) {
+                    e.printStackTrace();
+                }
+            }));
+        }
+        executor.invokeAll(calls);
 
         System.out.println("Dijkstra algorithm over");
         System.out.println("Started from node index = " + initialNode);
@@ -132,6 +147,15 @@ public class Client {
                 System.out.print("X, ");
             else
                 System.out.print(distances[node] + ", ");
+        }
+        System.out.println("\b\b]");
+
+        System.out.print("PrevNodes (X means initialNode) = [");
+        for(int node = 0; node < nodesCount; ++node) {
+            if (node == initialNode)
+                System.out.print("X, ");
+            else
+                System.out.print(prevNodes[node] + ", ");
         }
         System.out.println("\b\b]");
 
