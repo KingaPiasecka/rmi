@@ -27,7 +27,6 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
 
     public static void main(String args[]) throws RemoteException {
         if (args.length < 2) {
-            System.out.println("Server usage: <host> <ports>...");
             return;
         }
 
@@ -38,7 +37,6 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
             System.setProperty("java.rmi.server.hostname", host);
             Registry reg = LocateRegistry.createRegistry(Integer.parseInt(port));
             reg.rebind("server", new Server());
-            System.out.println("Server started on " + host + ":" + port);
         }
     }
 
@@ -61,7 +59,6 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
 
         for (int node = this.fromNode; node <= this.toNode; ++node) {
             if (visitedNodes.contains(node)) {
-                System.out.println("Worker " + this.workerId + ": node " + node + " already visited.");
                 continue;
             }
 
@@ -69,11 +66,9 @@ public class Server extends UnicastRemoteObject implements ServerInterface {
                 int nodeDistance = this.weights[currentNode][node];
                 int totalCostToNode = distances[currentNode] + nodeDistance;
 
-                System.out.println("Worker " + workerId + ": Node " + currentNode + " is connected to " + node + " (dist: " + nodeDistance + ", totalCostToNode: " + totalCostToNode + ")");
                 if (totalCostToNode < distances[node]) {
                     distances[node] = totalCostToNode;
                     prevNodes[node] = currentNode;
-                    System.out.println("New total cost is less then the old, replacing");
                 }
             }
         }

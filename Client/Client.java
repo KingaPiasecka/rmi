@@ -71,12 +71,10 @@ public class Client {
         PriorityQueue<Integer> nodesToVisit = new PriorityQueue<>();
         nodesToVisit.add(initialNode);
 
-        System.out.println("Sending weights to workers...");
         List<Callable<Object>> calls = new ArrayList<>();
         for (int i = 0; i < workerServersCount; ++i) {
             final int workerId = i;
             calls.add(Executors.callable(() -> {
-                System.out.println("Sending weights to worker " + workerId);
                 Pair<Integer, Integer> nodeRanges = calculateWorkerNodeRanges(workerId);
                 int fromNode = nodeRanges.getKey();
                 int toNode = nodeRanges.getValue();
@@ -97,13 +95,11 @@ public class Client {
 
         while (nodesToVisit.size() != 0) {
             Integer currentNode = nodesToVisit.poll();
-            System.out.println("Going through node = " + currentNode);
 
             calls = new ArrayList<>();
             for (int i = 0; i < workerServersCount; ++i) {
                 final int workerId = i;
                 calls.add(Executors.callable(() -> {
-                    System.out.println("Sending weights to worker " + workerId);
                     int[] workerDistances = new int[0];
                     try {
                         workerDistances = serverNodes[workerId].calculateDistances(currentNode, distances[currentNode]);
@@ -129,7 +125,6 @@ public class Client {
             calls.add(Executors.callable(() -> {
                 try {
                     int[] workerPrevNodes = serverNodes[workerId].getWorkerPrevNodesPart();
-                    System.out.println(workerId + ", fromNode=" + workerFromNodes[workerId] + ", count=" + workerNodesCount[workerId]);
                     System.arraycopy(workerPrevNodes, 0, prevNodes, workerFromNodes[workerId], workerNodesCount[workerId]);
                 }
                 catch(Exception e) {
@@ -139,8 +134,6 @@ public class Client {
         }
         executor.invokeAll(calls);
 
-        System.out.println("Dijkstra algorithm over");
-        System.out.println("Started from node index = " + initialNode);
         System.out.print("Distances (X means no path) = [");
         for (int node = 0; node < nodesCount; ++node) {
             if (distances[node] == MAX_INT)
