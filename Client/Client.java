@@ -134,7 +134,7 @@ public class Client {
         }
         executor.invokeAll(calls);
 
-        System.out.print("Distances (X means no path) = [");
+        System.out.print("Distances = [");
         for (int node = 0; node < nodesCount; ++node) {
             if (distances[node] == MAX_INT)
                 System.out.print("X, ");
@@ -143,7 +143,7 @@ public class Client {
         }
         System.out.println("\b\b]");
 
-        System.out.print("PrevNodes (X means initialNode) = [");
+        System.out.print("Path = [");
         for(int node = 0; node < nodesCount; ++node) {
             if (node == initialNode)
                 System.out.print("X, ");
